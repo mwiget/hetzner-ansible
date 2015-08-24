@@ -1,0 +1,86 @@
+---
+- hostname: name={{ hostname }}
+
+- name: mount /backup 
+  mount: src=/dev/sdb1 name=/backup fstype=ext4 state=mounted
+
+- name: Fix hostname in /etc/hosts
+  shell: sed -i "s/Ubuntu-1404-trusty-64-minimal/{{ hostname }}/g" /etc/hosts
+
+- name: disabling LANG_ALL in sshd_config
+  shell: sed -i 's/^AcceptEnv LANG LC_*/#AcceptEnv LANG LC_*/' /etc/ssh/sshd_config
+
+- name: check if ClientAliveInterval is present in sshd_config
+  shell: grep ^ClientAliveInterval /etc/ssh/sshd_config
+  ignore_errors: true
+  register: result
+
+# - debug: var=result
+
+- name: set ClientAliveInterval in sshd_config to 30 seconds
+  shell: sed -i "\$aClientAliveInterval=30" /etc/ssh/sshd_config
+  when: result.rc == 1
+
+- name: restart service ssh
+  service: name=sshd state=restarted
+  when: result.rc == 1
+
+- name: create user mwiget
+  user: name=mwiget
+        state=present
+        group=staff
+        groups="sudo"
+        shell=/bin/bash
+        password={{ password }}
+        comment="created via ansible"
+        generate_ssh_key=yes 
+        ssh_key_bits=2048 
+        ssh_key_file=.ssh/id_rsa
+
+- name: add id_dsa.pub to user mwiget
+  authorized_key: user=mwiget 
+    key="{{ lookup('file', '/Users/mwiget/.ssh/id_dsa.pub') }}"
+
+- name: install ufw
+  apt: name=ufw
+
+- name: allow rate limited ssh access, deny anything else
+  ufw: logging=on
+  ufw: state=enabled policy=allow
+  ufw: rule=limit port=ssh proto=tcp
+  ufw: state=enabled direction=incoming policy=deny
+
+- name: run apt-get update
+  apt: update_cache=yes
+
+- name: install development tools
+  action: apt pkg={{item}} state=installed
+  with_items:
+        - git
+        - build-essential
+        - pkg-config
+        - tmux
+        - bridge-utils
+        - zlib1g-dev
+        - htop
+        - hwloc
+        - tcpdump
+        - curl
+        - ssh-askpass
+        - qemu-kvm
+        - telnet
+        - libvirt-bin
+        - python-netifaces
+        - vnc4server
+        - libyaml-dev
+        - python-yaml
+        - numactl
+        - python-pip
+        - libxml2-dev
+        - libxslt1-dev
+        - qemu-kvm
+
+- name: install qemu build dependencies
+  apt: pkg=qemu state=build-dep install_recommends=no
+
+

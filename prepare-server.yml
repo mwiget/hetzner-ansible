@@ -1,0 +1,22 @@
+---
+- name: reboot server into rescue image
+  hosts: servers
+  connection: local
+  vars_files:
+  - secrets.yml
+  roles:
+  - role: hetzner-boot-rescue
+
+- name: install ubuntu 14.04 minimal
+  hosts: servers
+  vars_files:
+  - secrets.yml
+  roles:
+  - role: hetzner-install-ubuntu
+  
+- name: provision fresh server
+  hosts: servers
+  vars_files:
+  - secrets.yml
+  roles:
+  - role: provision-ubuntu

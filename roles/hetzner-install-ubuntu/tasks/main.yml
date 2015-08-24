@@ -1,0 +1,27 @@
+---
+- name: copy my public key into tempfile
+  shell: tail -1 /root/.ssh/authorized_keys > mykey
+
+- name: run installimage 
+  shell: /root/.oldroot/nfs/install/installimage -a -r no -i /root/images/Ubuntu-1404-trusty-64-minimal.tar.gz -d sda -f no -K /root/mykey
+  register: result
+
+# - debug: var=result
+#
+
+- name: reboot server
+  command: reboot
+  async: 0
+  poll: 0
+  ignore_errors: true
+
+- name: remove server from local known_hosts file
+  local_action: command  /usr/bin/ssh-keygen -R {{ inventory_hostname }}
+
+- name: waiting for server to come back
+  local_action:
+    module: wait_for
+      host={{ inventory_hostname }}
+      port=22
+      delay=1
+      timeout=60

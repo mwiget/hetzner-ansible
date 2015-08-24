@@ -1,0 +1,22 @@
+---
+- name: Check server status
+  hosts: servers
+  connection: local
+  vars_files:
+  - secrets.yml
+
+  tasks:
+
+  - name: retrieve first public key name from hetzner webrobot
+    uri: 
+      url: https://robot-ws.your-server.de/key
+      return_content: yes
+      method: GET
+      user: "{{ hetzner_webservice_username }}"
+      password: "{{ hetzner_webservice_password }}"
+      force_basic_auth: yes
+      status_code: 200
+    register: key
+
+  - debug: var=key.json[0].key.name
+

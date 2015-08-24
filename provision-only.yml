@@ -1,0 +1,7 @@
+---
+- name: provision fresh server
+  hosts: servers
+  vars_files:
+  - secrets.yml
+  roles:
+  - role: provision-ubuntu
