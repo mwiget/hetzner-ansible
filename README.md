@@ -1,10 +1,20 @@
-## Hetzner Ansible roles/scripts
+## Simple Hetzner API Ansible roles and scripts
 
 ### Overview
 
-My first attempt using ansible to manage, install and setup ubuntu 14.04 on a rented Root Server from [hetzner.de](http://hetzner.de) using their [API](http://wiki.hetzner.de/index.php/Robot_Webservice/en). 
+My first attempt using ansible to manage, install and setup ubuntu 14.04 on a rented Root Server from [http://hetzner.de](http://hetzner.de) using their [API](http://wiki.hetzner.de/index.php/Robot_Webservice/en). 
+There are other playbooks stored here to install and provision various applications, like qemu, dnsmasq etc. 
 
-3 roles are defined and present:
+### Shell scripts
+
+3 very simple shell scripts show the use the API via curl and how to create a password hash. They read the web API username/password from secrets.yml:
+
+- showmykeys.sh - shows the stored public ssh key on [https://robot.your-server.de](https://robot.your-server.de)
+- listmyservers.sh - lists all rented root servers
+- create-password-hash.sh - asks for a clear text password and displays the hash that can be used in secrets.yml as password (for a user account to be created in role provision-ubuntu).
+
+
+### Ansible roles
 
 - hetzner-boot-rescue: Reboot server into recovery mode
 - hetzner-install-ubuntu: Run installimage
@@ -17,7 +27,7 @@ cp hosts.sample hosts
 cp secrets.yml.sample secrets.yml
 ```
 
-### list tasks in the playbook
+### List tasks in the playbook
 
 ```
 $ ansible-playbook --list-tasks prepare-server.yml
@@ -57,7 +67,7 @@ playbook: prepare-server.yml
     install qemu build dependencies	TAGS: []
 ```
 
-Run the playbook:
+### Run the playbook:
 
 ```
 $ ansible-playbook prepare-server.yml
