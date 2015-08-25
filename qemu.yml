@@ -1,0 +1,19 @@
+---
+- name: install qemu
+  hosts: servers
+  vars:
+    qemu_src_dir: /root/qemu
+
+  tasks:
+
+  - name: clone qemu from git
+    git: repo=git://git.qemu-project.org/qemu.git
+         dest={{ qemu_src_dir }} accept_hostkey=true
+
+  - name: Build qemu for target x86_64-softmmu
+    shell: 'cd {{ qemu_src_dir }};{{ item }}'
+    with_items:
+      - ./configure --target-list=x86_64-softmmu
+      - make -j
+      - make install
+
