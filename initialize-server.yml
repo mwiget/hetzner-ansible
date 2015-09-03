@@ -14,9 +14,9 @@
   roles:
   - role: hetzner-install-ubuntu
   
-- name: provision fresh server
+- name: install docker
   hosts: servers
   vars_files:
   - secrets.yml
   roles:
-  - role: provision-ubuntu
+  - role: install-docker
