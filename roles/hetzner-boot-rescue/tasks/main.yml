@@ -58,6 +58,9 @@
 - name: remove server from local known_hosts file
   shell: ssh-keygen -R {{ inventory_hostname }}
 
+- name: pause a bit for the hardware reset to kick in
+  pause: seconds=15
+
 - name: waiting for server to come back
   local_action: 
     module: wait_for 
