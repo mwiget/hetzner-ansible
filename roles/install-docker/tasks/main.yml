@@ -15,6 +15,9 @@
 - name: install docker
   shell: curl -sSL https://get.docker.com/ | sh
 
+- name: add user mwiget to docker
+  shell: usermod -aG docker mwiget
+
 - name: run docker hello 
   shell: docker run hello-world
   register: result
