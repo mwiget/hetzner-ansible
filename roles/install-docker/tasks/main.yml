@@ -18,9 +18,9 @@
 - name: add user mwiget to docker
   shell: usermod -aG docker mwiget
 
-- name: run docker hello 
-  shell: docker run hello-world
-  register: result
-
-- debug: var=result
+#- name: run docker hello 
+#  shell: docker run hello-world
+#  register: result
+#
+#- debug: var=result
 

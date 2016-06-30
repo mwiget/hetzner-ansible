@@ -1,9 +1,6 @@
 ---
 - hostname: name={{ hostname }}
 
-- name: mount /backup 
-  mount: src=/dev/sdb1 name=/backup fstype=ext4 state=mounted
-
 - name: Fix hostname in /etc/hosts
   shell: sed -i "s/Ubuntu-1404-trusty-64-minimal/{{ hostname }}/g" /etc/hosts
 
@@ -79,6 +76,7 @@
         - libxml2-dev
         - libxslt1-dev
         - qemu-kvm
+        - ansible
 
 - name: install qemu build dependencies
   apt: pkg=qemu state=build-dep install_recommends=no

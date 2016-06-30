@@ -18,7 +18,7 @@
 
 - name: check rescue mode
   uri:
-    url: https://robot-ws.your-server.de/boot/{{ inventory_hostname }}/rescue
+    url: "https://robot-ws.your-server.de/boot/{{ inventory_hostname }}/rescue"
     method: GET
     user: "{{ hetzner_webservice_username }}"
     password: "{{ hetzner_webservice_password }}"

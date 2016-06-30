@@ -1,9 +1,10 @@
 ---
+
 - name: copy my public key into tempfile
-  shell: tail -1 /root/.ssh/authorized_keys > mykey
+  shell: /usr/bin/tail -1 /root/.ssh/authorized_keys > mykey
 
 - name: run installimage 
-  shell: /root/.oldroot/nfs/install/installimage -a -r no -i /root/images/Ubuntu-1404-trusty-64-minimal.tar.gz -d sda -f no -K /root/mykey
+  shell: /root/.oldroot/nfs/install/installimage -a -r no -i /root/images/Ubuntu-1604-xenial-64-minimal.tar.gz -d sda,sdb -K /root/mykey
   register: result
 
 # - debug: var=result
@@ -13,10 +14,11 @@
   command: reboot
   async: 0
   poll: 0
-  ignore_errors: true
+  ignore_errors: True
 
 - name: remove server from local known_hosts file
   local_action: command  /usr/bin/ssh-keygen -R {{ inventory_hostname }}
+  ignore_errors: True
 
 
 - name: pause for a while for the reboot to kick in
@@ -28,16 +30,18 @@
       host={{ inventory_hostname }}
       port=22
       delay=1
-      timeout=60
+      timeout=90
 
-- name: mount /backup 
-  mount: src=/dev/sdb1 name=/backup fstype=ext4 state=mounted
+- name: apt-get update 
+  raw: apt-get update -qq 
+- name: Install python 2.7 
+  raw: apt-get install -qq python2.7 
 
 - name: Fix hostname in /etc/hosts
-  shell: sed -i "s/Ubuntu-1404-trusty-64-minimal/{{ hostname }}/g" /etc/hosts
+  shell: sed -i "s/Ubuntu-1604-xenial-64-minimal/{{ hostname }}/g" /etc/hosts
 
 - name: Fix hostname in /etc/hostname
-  shell: sed -i "s/Ubuntu-1404-trusty-64-minimal/{{ hostname }}/g" /etc/hostname
+  shell: sed -i "s/Ubuntu-1604-xenial-64-minimal/{{ hostname }}/g" /etc/hostname
 
 - name: set hostname
   shell: hostname {{ hostname }}
@@ -60,6 +64,12 @@
   service: name=ssh state=restarted
   when: result.rc == 1
 
+- name: set 12000 hugepages via /etc/default/grub
+  shell: sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"hugepages=12000 /" /etc/default/grub && update-grub
+
+- name: set 12000 hugepages 
+  shell: echo 12000 > /proc/sys/vm/nr_hugepages
+
 - name: create user mwiget
   user: name=mwiget
         state=present
@@ -72,35 +82,27 @@
         ssh_key_bits=2048 
         ssh_key_file=.ssh/id_rsa
 
-- name: add id_dsa.pub to user mwiget
+- name: add id_rsa.pub to user mwiget
   authorized_key: user=mwiget 
-    key="{{ lookup('file', '/Users/mwiget/.ssh/id_dsa.pub') }}"
+    key="{{ lookup('file', '/Users/mwiget/.ssh/id_rsa.pub') }}"
 
-- name: run apt-get update
-  apt: update_cache=yes
+- name: copy .vimrc into /root
+  copy: src=files/vimrc dest=~root/.vimrc
 
-- name: install minimal toolset
-  action: apt pkg={{item}} state=installed
-  with_items:
-        - git
-        - bridge-utils
-        - htop
-        - tcpdump
-        - telnet
-        - curl
+- name: copy .vimrc into ~mwiget
+  copy: src=files/vimrc dest=~mwiget/.vimrc
 
-- name: install ufw
-  apt: name=ufw state=latest update_cache=yes
+#- name: run apt-get update
+#  apt: update_cache=yes
 
-- name: Setup ufw
-  ufw: state=enabled direction=incoming policy=deny
-
-- name: set logging
-  ufw: logging=on
-
-- name: allow ssh
-  ufw: rule=allow  port=22  proto=tcp
-
-- name: rate limit ssh
-  ufw: rule=limit port=22 proto=tcp
-
+#- name: install minimal toolset
+#  action: apt pkg={{item}} state=installed
+#  with_items:
+#        - git
+#        - bridge-utils
+#        - htop
+#        - tcpdump
+#        - telnet
+#        - curl
+#        - socat
+#        - ansible
