@@ -20,3 +20,10 @@
   - secrets.yml
   roles:
   - role: install-docker
+
+- name: final reboot
+  hosts: servers
+  vars_files:
+  - secrets.yml
+  roles:
+  - role: reboot

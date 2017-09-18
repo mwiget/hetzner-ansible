@@ -11,12 +11,18 @@
         - tcpdump
         - telnet
         - curl
+        - dnsmasq
+        - make
+        - tmux
 
 - name: install docker
   shell: curl -sSL https://get.docker.com/ | sh
 
 - name: add user mwiget to docker
   shell: usermod -aG docker mwiget
+
+- name: install docker-compose
+  shell: curl -L https://github.com/docker/compose/releases/download/1.14.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose && chmod a+rx /usr/local/bin/docker-compose
 
 #- name: run docker hello 
 #  shell: docker run hello-world

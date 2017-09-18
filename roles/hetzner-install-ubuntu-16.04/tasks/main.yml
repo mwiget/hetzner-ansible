@@ -64,11 +64,8 @@
   service: name=ssh state=restarted
   when: result.rc == 1
 
-- name: set 12000 hugepages via /etc/default/grub
-  shell: sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"hugepages=12000 /" /etc/default/grub && update-grub
-
-- name: set 12000 hugepages 
-  shell: echo 12000 > /proc/sys/vm/nr_hugepages
+- name: set 24 hugepages via /etc/default/grub
+  shell: sed -i "s/GRUB_CMDLINE_LINUX=\"/GRUB_CMDLINE_LINUX=\"default_hugepagesz=1G hugepagesz=1G hugepages=24/" /etc/default/grub && update-grub
 
 - name: create user mwiget
   user: name=mwiget
