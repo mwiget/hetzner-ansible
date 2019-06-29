@@ -3,20 +3,23 @@
   apt: update_cache=yes
 
 - name: install minimal toolset
-  action: apt pkg={{item}} state=installed
-  with_items:
-        - git
-        - bridge-utils
-        - htop
-        - tcpdump
-        - telnet
-        - curl
-        - dnsmasq
-        - make
-        - tmux
+  apt:
+    name: ['git', 'bridge-utils', 'htop', 'tcpdump', 'curl', 'dnsmasq', 'make', 'tmux']
+    state: present
+    update_cache: yes
 
-- name: install docker
-  shell: curl -sSL https://get.docker.com/ | sh
+- name: Add Docker GPG key
+  apt_key: url=https://download.docker.com/linux/ubuntu/gpg
+
+- name: Add Docker APT repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} test
+
+- name: Install list of packages
+  apt:
+    name: ['apt-transport-https','ca-certificates','curl','software-properties-common','docker-ce']
+    state: present
+    update_cache: yes
 
 - name: add user mwiget to docker
   shell: usermod -aG docker mwiget
